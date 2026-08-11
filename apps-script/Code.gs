@@ -62,19 +62,17 @@ function doPost(e) {
   }
 
   var sheet = getSheet();
+  var header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var rowValues = header.map(function (col) {
+    if (col === 'timestamp') return new Date().toISOString();
+    if (col === 'link') return link;
+    return data[col] || '';
+  });
   // "2026-08-15" 같은 날짜 형식 문자열을 시트가 자동으로 날짜 셀로 바꿔버리는 걸 막기 위해
   // 값을 쓰기 전에 셀 서식을 텍스트로 고정해둡니다.
-  var range = sheet.getRange(sheet.getLastRow() + 1, 1, 1, 7);
+  var range = sheet.getRange(sheet.getLastRow() + 1, 1, 1, header.length);
   range.setNumberFormat('@');
-  range.setValues([[
-    new Date().toISOString(),
-    data.category || '',
-    data.author || '',
-    data.title || '',
-    data.content || '',
-    link,
-    data.part || ''
-  ]]);
+  range.setValues([rowValues]);
   return jsonOutput({ ok: true, link: link });
 }
 
@@ -143,20 +141,25 @@ function cellToValue(v) {
   return v;
 }
 
+var REQUIRED_HEADERS = ['timestamp', 'category', 'author', 'title', 'content', 'link', 'part', 'filename'];
+
 function getSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(['timestamp', 'category', 'author', 'title', 'content', 'link', 'part']);
+    sheet.appendRow(REQUIRED_HEADERS);
     return sheet;
   }
-  // 예전에 만들어진 시트에는 'part' 칸이 없을 수 있어서, 없으면 자동으로 추가해줍니다.
+  // 예전에 만들어진 시트에는 일부 칸(part, filename 등)이 없을 수 있어서, 없으면 자동으로 추가해줍니다.
   var lastCol = sheet.getLastColumn();
   var header = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
-  if (header.indexOf('part') === -1) {
-    sheet.getRange(1, header.length + 1).setValue('part');
-  }
+  REQUIRED_HEADERS.forEach(function (col) {
+    if (header.indexOf(col) === -1) {
+      header.push(col);
+      sheet.getRange(1, header.length).setValue(col);
+    }
+  });
   return sheet;
 }
 

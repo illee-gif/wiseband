@@ -163,6 +163,13 @@
   .video-chip img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:var(--border);}
   .video-chip__play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;background:rgba(0,0,0,.2);}
 
+  .score-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:8px;padding:4px 8px 4px 4px;max-width:220px;}
+  .score-chip__thumb{display:block;width:34px;flex:none;border-radius:5px;overflow:hidden;border:2px solid;}
+  .score-chip__thumb img{width:100%;display:block;aspect-ratio:3/4;object-fit:cover;background:var(--border);}
+  .score-chip__meta{display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .score-chip__part{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.04em;text-decoration:none;border-bottom:1px solid currentColor;width:fit-content;}
+  .score-chip__filename{font-size:11.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
+
   .item-controls{display:inline-flex;flex:none;}
   .item-controls .del-btn{padding:2px 4px;font-size:10.5px;}
 
@@ -273,7 +280,7 @@
   </section>
 
   <section class="module" id="scores" data-reveal>
-    <div class="module__head"><span class="module__tab" style="background:var(--guitar)"></span><h2 class="module__title">곡별 자료</h2></div>
+    <div class="module__head"><span class="module__tab" style="background:var(--guitar)"></span><h2 class="module__title">악보, 참고영상</h2></div>
     <p class="module__hint">곡마다 악보와 참고 영상을 한 카드에 모아둬요. 악보는 사진이나 PDF를 바로 드래그하거나 선택하면 구글 드라이브에 올라가요 — 아이패드에서 두 손가락으로 확대해서 볼 수 있어요.</p>
     <div id="songs-grid" class="songs"></div>
     <div id="form-song"></div>
@@ -452,6 +459,12 @@
     '</span>';
   }
 
+  function driveFileId(url){
+    if(!url) return null;
+    var m = String(url).match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : null;
+  }
+
   function youtubeId(url){
     if(!url) return null;
     var s = String(url);
@@ -475,8 +488,24 @@
       var label = PART_LABELS[p] || '기타';
       var color = 'var(--' + (p === 'etc' ? 'text-muted' : p) + ')';
       return byPart[p].slice().reverse().map(function(it){
-        return '<span class="chip" style="color:' + color + ';border-color:' + color + '" title="' + escapeAttr(it.author || '') + ' · ' + fmtDate(it.timestamp) + (it.content ? ' — ' + escapeAttr(it.content) : '') + '">' +
+        var titleAttr = escapeAttr((it.author || '') + ' · ' + fmtDate(it.timestamp) + (it.content ? ' — ' + it.content : ''));
+        var fid = driveFileId(it.link);
+        var filenameHtml = it.filename ? '<span class="score-chip__filename">' + escapeHtml(it.filename) + '</span>' : '';
+        if(fid){
+          return '<span class="score-chip" title="' + titleAttr + '">' +
+            '<a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener" class="score-chip__thumb" style="border-color:' + color + '">' +
+              '<img src="https://drive.google.com/thumbnail?id=' + fid + '&sz=w200" alt="" loading="lazy">' +
+            '</a>' +
+            '<span class="score-chip__meta">' +
+              '<a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener" class="score-chip__part" style="color:' + color + ';border-color:' + color + '">' + label + '</a>' +
+              filenameHtml +
+            '</span>' +
+            itemControls('score', it.timestamp) +
+          '</span>';
+        }
+        return '<span class="chip" style="color:' + color + ';border-color:' + color + '" title="' + titleAttr + '">' +
           '<a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">' + label + '</a>' +
+          filenameHtml +
           itemControls('score', it.timestamp) +
         '</span>';
       }).join('');
@@ -721,8 +750,8 @@
 
       var part = category === 'score' ? host.querySelector('[data-field="part"]').value : '';
 
-      function afterSuccess(finalLink){
-        STORE[category].push({ category: category, author: author, title: title, content: content, link: finalLink, part: part, timestamp: new Date().toISOString() });
+      function afterSuccess(finalLink, finalFilename){
+        STORE[category].push({ category: category, author: author, title: title, content: content, link: finalLink, part: part, filename: finalFilename || '', timestamp: new Date().toISOString() });
         renderSongs();
         updateSongNames();
         status.textContent = '저장됨';
@@ -733,12 +762,14 @@
       if(category === 'score'){
         if(!selectedFile){ status.textContent = '악보 파일을 선택해주세요'; return; }
         status.textContent = '업로드 중...';
+        var uploadFilename = selectedFile.name;
         resizeImageFile(selectedFile, 1600, 0.82).then(function(f){
+          uploadFilename = f.name;
           return fileToBase64(f).then(function(b64){
             return postEntry({ key: PASSPHRASE, category: category, author: author, title: title, content: content, part: part, filename: f.name, mimeType: f.type, fileData: b64 });
           });
         }).then(function(res){
-          afterSuccess(res.link || '');
+          afterSuccess(res.link || '', uploadFilename);
         }).catch(function(err){
           status.textContent = '업로드 실패: ' + err.message;
         });
