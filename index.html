@@ -244,7 +244,7 @@
     <div class="module__head"><span class="module__tab" style="background:var(--vocal)"></span><h2 class="module__title">지금 우리는</h2></div>
     <div class="status-grid">
       <div class="card status-card"><div class="status-card__label">다음 연습</div><div class="status-card__value" id="schedule-value">일정이 아직 없어요</div></div>
-      <div class="card status-card"><div class="status-card__label">연습 곡</div><div class="status-card__value">첫 곡을 정해보세요</div></div>
+      <div class="card status-card"><div class="status-card__label">연습 곡</div><div class="status-card__value" id="songs-value">첫 곡을 정해보세요</div></div>
     </div>
     <div id="form-schedule" style="margin-top:14px;"></div>
   </section>
@@ -414,7 +414,7 @@
     minutes:   [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'내용', type:'textarea'}],
     journal:   [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'오늘 어땠는지', type:'textarea'}],
     cheer:     [{key:'content', label:'메시지', type:'textarea'}],
-    schedule:  [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'장소/메모', type:'text'}],
+    schedule:  [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'장소/메모', type:'text'}, {key:'link', label:'연습할 곡', type:'text'}],
     score:     [{key:'title', label:'곡명', type:'text'}, {key:'part', label:'파트', type:'select', options:[['vocal','보컬 (일반)'],['guitar','일렉'],['drums','드럼'],['bass','베이스']]}, {key:'content', label:'비고', type:'text'}],
     video:     [{key:'title', label:'곡명', type:'text'}, {key:'link', label:'링크', type:'url'}, {key:'content', label:'비고', type:'text'}],
     recording: [{key:'title', label:'제목', type:'text'}, {key:'link', label:'링크', type:'url'}, {key:'content', label:'비고', type:'text'}],
@@ -891,18 +891,28 @@
 
   function renderSchedule(){
     var el = document.getElementById('schedule-value');
+    var songsEl = document.getElementById('songs-value');
     if(!el) return;
     var entries = STORE.schedule;
-    if(!entries.length){ el.textContent = '일정이 아직 없어요'; return; }
+    if(!entries.length){
+      el.textContent = '일정이 아직 없어요';
+      if(songsEl) songsEl.textContent = '첫 곡을 정해보세요';
+      return;
+    }
     var latest = entries[entries.length - 1];
     var d = new Date(latest.title + 'T00:00:00');
-    if(isNaN(d.getTime())){ el.textContent = '일정이 아직 없어요'; return; }
+    if(isNaN(d.getTime())){
+      el.textContent = '일정이 아직 없어요';
+      if(songsEl) songsEl.textContent = '첫 곡을 정해보세요';
+      return;
+    }
     var today = new Date(); today.setHours(0,0,0,0);
     var diffDays = Math.round((d - today) / 86400000);
     var label = (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
     var dday = diffDays === 0 ? 'D-DAY' : (diffDays > 0 ? ('D-' + diffDays) : '지난 연습');
     var note = latest.content ? '<div class="status-card__note">' + escapeHtml(latest.content) + '</div>' : '';
     el.innerHTML = label + '<span class="dday">' + dday + '</span>' + itemControls('schedule', latest.timestamp) + note;
+    if(songsEl) songsEl.textContent = latest.link ? latest.link : '아직 안 정했어요';
   }
 
   function buildScheduleForm(){
@@ -915,6 +925,9 @@
           '<input data-field="title" type="date">' +
           authorSelect +
           '<input data-field="content" type="text" placeholder="장소/메모 (선택)">' +
+        '</div>' +
+        '<div class="form__row">' +
+          '<input data-field="link" type="text" placeholder="연습할 곡 (선택, 쉼표로 구분)">' +
         '</div>' +
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
           '<span class="form__status" data-status></span>' +
