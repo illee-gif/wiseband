@@ -125,8 +125,13 @@
     background:var(--bg);color:var(--text);font-size:14px;width:100%;
   }
   .form textarea{resize:vertical;min-height:64px;}
+  .form textarea.form__memo{min-height:140px;font-size:14.5px;line-height:1.6;}
   .form__submit{align-self:flex-end;padding:10px 18px;border:none;border-radius:8px;background:var(--guitar);color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
   .form__status{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);min-height:16px;}
+
+  .dropzone{border:1.5px dashed var(--border);border-radius:10px;padding:22px 16px;text-align:center;font-size:13.5px;color:var(--text-muted);cursor:pointer;transition:border-color .15s, background .15s, color .15s;}
+  .dropzone.is-dragover{border-color:var(--guitar);background:color-mix(in srgb, var(--guitar) 8%, transparent);color:var(--guitar);}
+  .dropzone__filename{display:block;margin-top:8px;font-family:var(--font-mono);font-size:12px;color:var(--text);}
 
   .songs{display:flex;flex-direction:column;gap:12px;margin-bottom:14px;}
   .song-card{padding:18px 20px;}
@@ -139,6 +144,18 @@
   .song-link a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border);font-weight:600;}
   .song-link__note{color:var(--text-muted);}
   .song-link__meta{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:auto;}
+
+  .score-part{margin-top:10px;}
+  .score-part:first-child{margin-top:0;}
+  .score-part__tag{display:inline-block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor;border-radius:999px;padding:1px 8px;margin-bottom:5px;}
+
+  .video-card{display:flex;gap:10px;align-items:flex-start;text-decoration:none;color:var(--text);padding:6px 0;}
+  .video-card__thumb{position:relative;flex:none;width:104px;border-radius:6px;overflow:hidden;background:var(--border);}
+  .video-card__thumb img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;}
+  .video-card__play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;background:rgba(0,0,0,.18);text-shadow:0 1px 4px rgba(0,0,0,.5);}
+  .video-card__body{flex:1;min-width:0;padding-top:1px;}
+  .video-card__note{font-size:13px;color:var(--text);}
+  .video-card__meta{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:4px;}
 
   .wall{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
   .note{padding:18px 16px;border-radius:4px 4px 10px 4px;font-size:13.5px;line-height:1.55;box-shadow:var(--shadow);min-height:100px;}
@@ -225,7 +242,7 @@
 
   <section class="module" data-reveal>
     <div class="module__head"><span class="module__tab" style="background:var(--guitar)"></span><h2 class="module__title">곡별 자료</h2></div>
-    <p class="module__hint">곡마다 악보와 참고 영상을 한 카드에 모아둬요. 악보는 구글 드라이브에 사진/PDF로 올린 뒤 링크를 붙여넣으세요 — 아이패드에서 두 손가락으로 확대해서 볼 수 있어요.</p>
+    <p class="module__hint">곡마다 악보와 참고 영상을 한 카드에 모아둬요. 악보는 사진이나 PDF를 바로 드래그하거나 선택하면 구글 드라이브에 올라가요 — 아이패드에서 두 손가락으로 확대해서 볼 수 있어요.</p>
     <div id="songs-grid" class="songs"></div>
     <div id="form-song"></div>
     <datalist id="song-names"></datalist>
@@ -233,7 +250,7 @@
 
   <section class="module" data-reveal>
     <div class="module__head"><span class="module__tab" style="background:var(--bass)"></span><h2 class="module__title">우리 연습 기록</h2></div>
-    <p class="module__hint">실제로 합주하거나 개인 연습한 영상·녹음. 구글 드라이브 링크를 붙여넣어주세요.</p>
+    <p class="module__hint">실제로 합주하거나 개인 연습한 영상·사진. 드래그하거나 스마트폰 사진첩에서 바로 올리면 구글 드라이브에 저장돼요 (또는 링크만 붙여넣어도 돼요).</p>
     <div id="list-recording" class="entries"></div>
     <div id="form-recording"></div>
   </section>
@@ -258,6 +275,7 @@
   var PASSPHRASE = "1234"; // 잠금 화면 암호. Apps Script의 SHARED_KEY와 같은 값이어야 해요.
   var API_URL = "https://script.google.com/macros/s/AKfycbxX2Y2akrO_9y4_vRMm8R6rlUudmjmTnQ_3ozJry-pK6vNEWnG4alz17F_IjXd2ia0b/exec";
   var AUTHORS = ["재성","채진","일","지원"];
+  var MAX_UPLOAD_MB = 40; // 구글 앱스스크립트 업로드 요청 크기 한계 때문에 둔 상한선
 
   // ====== 잠금 화면 ======
   var gate = document.getElementById('gate');
@@ -343,9 +361,8 @@
 
   // ====== 폼 ======
   var FORM_FIELDS = {
-    minutes:   [{key:'title', label:'제목', type:'text'}, {key:'content', label:'내용', type:'textarea'}],
-    journal:   [{key:'title', label:'제목 (예: 연습 날짜)', type:'text'}, {key:'content', label:'오늘 어땠는지', type:'textarea'}],
-    recording: [{key:'title', label:'제목', type:'text'}, {key:'link', label:'드라이브 링크', type:'url'}, {key:'content', label:'비고 (선택)', type:'textarea'}],
+    minutes:   [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'내용', type:'textarea'}],
+    journal:   [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'오늘 어땠는지', type:'textarea'}],
     cheer:     [{key:'content', label:'메시지', type:'textarea'}]
   };
 
@@ -359,9 +376,52 @@
     dl.innerHTML = Object.keys(names).map(function(n){ return '<option value="' + escapeAttr(n) + '"></option>'; }).join('');
   }
 
-  function songGroup(label, color, items){
+  var PART_LABELS = { vocal: '보컬 (일반)', guitar: '일렉', drums: '드럼', bass: '베이스' };
+  var PART_ORDER = ['vocal', 'guitar', 'drums', 'bass'];
+
+  function scoreGroup(items){
+    if(!items.length) return '';
+    var byPart = {};
+    items.forEach(function(it){
+      var p = PART_LABELS[it.part] ? it.part : 'etc';
+      if(!byPart[p]) byPart[p] = [];
+      byPart[p].push(it);
+    });
+    var order = PART_ORDER.filter(function(p){ return byPart[p]; });
+    if(byPart.etc) order.push('etc');
+    var body = order.map(function(p){
+      var label = PART_LABELS[p] || '기타 파일';
+      var color = 'var(--' + (p === 'etc' ? 'text-muted' : p) + ')';
+      var links = byPart[p].slice().reverse().map(function(it){
+        var note = it.content ? ' <span class="song-link__note">— ' + escapeHtml(it.content) + '</span>' : '';
+        return '<div class="song-link"><a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">보기 →</a>' + note +
+          '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span></div>';
+      }).join('');
+      return '<div class="score-part"><span class="score-part__tag" style="color:' + color + '">' + label + '</span>' +
+        '<div class="song-card__links">' + links + '</div></div>';
+    }).join('');
+    return '<div class="song-card__group"><div class="song-card__label" style="color:var(--guitar)">악보</div>' + body + '</div>';
+  }
+
+  function youtubeId(url){
+    if(!url) return null;
+    var m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+    return m ? m[1] : null;
+  }
+
+  function songGroup(label, color, items, isVideo){
     if(!items.length) return '';
     var links = items.slice().reverse().map(function(it){
+      var yid = isVideo ? youtubeId(it.link) : null;
+      if(yid){
+        var note = it.content ? '<div class="video-card__note">' + escapeHtml(it.content) + '</div>' : '';
+        return '<a class="video-card" href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">' +
+          '<div class="video-card__thumb"><img src="https://img.youtube.com/vi/' + yid + '/mqdefault.jpg" alt="" loading="lazy"><span class="video-card__play">▶</span></div>' +
+          '<div class="video-card__body">' + note +
+            '<div class="video-card__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</div>' +
+          '</div>' +
+        '</a>';
+      }
       var note = it.content ? ' <span class="song-link__note">— ' + escapeHtml(it.content) + '</span>' : '';
       return '<div class="song-link"><a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">보기 →</a>' + note +
         '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span></div>';
@@ -391,10 +451,43 @@
     el.innerHTML = order.map(function(name){
       return '<div class="card song-card">' +
         '<div class="song-card__title">' + escapeHtml(name) + '</div>' +
-        songGroup('악보', 'var(--guitar)', songs[name].score) +
-        songGroup('참고 영상', 'var(--drums)', songs[name].video) +
+        scoreGroup(songs[name].score) +
+        songGroup('참고 영상', 'var(--drums)', songs[name].video, true) +
       '</div>';
     }).join('');
+  }
+
+  function resizeImageFile(file, maxSize, quality){
+    return new Promise(function(resolve){
+      if(!/^image\//.test(file.type)){ resolve(file); return; }
+      var reader = new FileReader();
+      reader.onload = function(){
+        var img = new Image();
+        img.onload = function(){
+          var scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+          var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          canvas.toBlob(function(blob){
+            resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file);
+          }, 'image/jpeg', quality);
+        };
+        img.onerror = function(){ resolve(file); };
+        img.src = reader.result;
+      };
+      reader.onerror = function(){ resolve(file); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function fileToBase64(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(String(reader.result).split(',')[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
   function buildSongForm(){
@@ -407,7 +500,24 @@
           authorSelect +
           '<select data-field="category"><option value="score">악보</option><option value="video">참고 영상</option></select>' +
           '<input data-field="title" list="song-names" type="text" placeholder="곡명">' +
+        '</div>' +
+        '<div class="form__row" data-link-row>' +
           '<input data-field="link" type="url" placeholder="링크">' +
+        '</div>' +
+        '<div data-dropzone-row>' +
+          '<div class="form__row">' +
+            '<select data-field="part">' +
+              '<option value="vocal">보컬 (일반)</option>' +
+              '<option value="guitar">일렉</option>' +
+              '<option value="drums">드럼</option>' +
+              '<option value="bass">베이스</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="dropzone" data-dropzone tabindex="0">' +
+            '<input type="file" data-file-input accept="image/*,application/pdf" style="display:none;">' +
+            '<div>악보 사진/PDF를 여기로 드래그하거나, 탭해서 선택하세요</div>' +
+            '<span class="dropzone__filename" data-filename></span>' +
+          '</div>' +
         '</div>' +
         '<div class="form__row">' +
           '<input data-field="content" type="text" placeholder="비고 (선택)">' +
@@ -419,26 +529,89 @@
       '</div>';
 
     var status = host.querySelector('[data-status]');
-    host.querySelector('.form__submit').addEventListener('click', function(){
-      var payload = { key: PASSPHRASE };
-      host.querySelectorAll('[data-field]').forEach(function(el){ payload[el.getAttribute('data-field')] = el.value; });
-      if(!payload.title || !payload.link){
-        status.textContent = '곡명과 링크를 입력해주세요';
-        return;
+    var categorySelect = host.querySelector('[data-field="category"]');
+    var linkRow = host.querySelector('[data-link-row]');
+    var dropzoneRow = host.querySelector('[data-dropzone-row]');
+    var dropzone = host.querySelector('[data-dropzone]');
+    var fileInput = host.querySelector('[data-file-input]');
+    var filenameEl = host.querySelector('[data-filename]');
+    var selectedFile = null;
+
+    function syncCategoryUI(){
+      var isScore = categorySelect.value === 'score';
+      linkRow.style.display = isScore ? 'none' : '';
+      dropzoneRow.style.display = isScore ? '' : 'none';
+    }
+    categorySelect.addEventListener('change', syncCategoryUI);
+    syncCategoryUI();
+
+    dropzone.addEventListener('click', function(){ fileInput.click(); });
+    dropzone.addEventListener('dragover', function(e){ e.preventDefault(); dropzone.classList.add('is-dragover'); });
+    dropzone.addEventListener('dragleave', function(){ dropzone.classList.remove('is-dragover'); });
+    dropzone.addEventListener('drop', function(e){
+      e.preventDefault();
+      dropzone.classList.remove('is-dragover');
+      if(e.dataTransfer.files && e.dataTransfer.files[0]){
+        selectedFile = e.dataTransfer.files[0];
+        filenameEl.textContent = selectedFile.name;
       }
+    });
+    fileInput.addEventListener('change', function(){
+      if(fileInput.files && fileInput.files[0]){
+        selectedFile = fileInput.files[0];
+        filenameEl.textContent = selectedFile.name;
+      }
+    });
+
+    function resetForm(){
+      host.querySelector('[data-field="title"]').value = '';
+      host.querySelector('[data-field="content"]').value = '';
+      host.querySelector('[data-field="link"]').value = '';
+      selectedFile = null;
+      filenameEl.textContent = '';
+    }
+
+    host.querySelector('.form__submit').addEventListener('click', function(){
+      var author = host.querySelector('[data-field="author"]').value;
+      var category = categorySelect.value;
+      var title = host.querySelector('[data-field="title"]').value.trim();
+      var content = host.querySelector('[data-field="content"]').value;
+      var link = host.querySelector('[data-field="link"]').value;
+
+      if(!title){ status.textContent = '곡명을 입력해주세요'; return; }
       if(!API_URL){ status.textContent = '백엔드 연결 전이에요 (SETUP.md 참고)'; return; }
-      status.textContent = '저장 중...';
-      postEntry(payload).then(function(){
-        status.textContent = '저장됨';
-        payload.timestamp = new Date().toISOString();
-        STORE[payload.category].push(payload);
+
+      var part = category === 'score' ? host.querySelector('[data-field="part"]').value : '';
+
+      function afterSuccess(finalLink){
+        STORE[category].push({ category: category, author: author, title: title, content: content, link: finalLink, part: part, timestamp: new Date().toISOString() });
         renderSongs();
         updateSongNames();
-        host.querySelectorAll('input[data-field]').forEach(function(el){ el.value = ''; });
+        status.textContent = '저장됨';
+        resetForm();
         setTimeout(function(){ status.textContent = ''; }, 2000);
-      }).catch(function(err){
-        status.textContent = '저장 실패: ' + err.message;
-      });
+      }
+
+      if(category === 'score'){
+        if(!selectedFile){ status.textContent = '악보 파일을 선택해주세요'; return; }
+        status.textContent = '업로드 중...';
+        resizeImageFile(selectedFile, 1600, 0.82).then(function(f){
+          return fileToBase64(f).then(function(b64){
+            return postEntry({ key: PASSPHRASE, category: category, author: author, title: title, content: content, part: part, filename: f.name, mimeType: f.type, fileData: b64 });
+          });
+        }).then(function(res){
+          afterSuccess(res.link || '');
+        }).catch(function(err){
+          status.textContent = '업로드 실패: ' + err.message;
+        });
+        return;
+      }
+
+      if(!link){ status.textContent = '링크를 입력해주세요'; return; }
+      status.textContent = '저장 중...';
+      postEntry({ key: PASSPHRASE, category: category, author: author, title: title, content: content, link: link })
+        .then(function(){ afterSuccess(link); })
+        .catch(function(err){ status.textContent = '저장 실패: ' + err.message; });
     });
   }
 
@@ -447,16 +620,22 @@
     if(!host) return;
     var fields = FORM_FIELDS[category];
     var authorSelect = '<select data-field="author">' + AUTHORS.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('') + '</select>';
-    var fieldHtml = fields.map(function(f){
-      if(f.type === 'textarea'){
-        return '<textarea data-field="' + f.key + '" placeholder="' + f.label + '"></textarea>';
-      }
-      return '<input data-field="' + f.key + '" type="' + (f.type === 'url' ? 'url' : 'text') + '" placeholder="' + f.label + '">';
+    var topFields = fields.filter(function(f){ return f.type !== 'textarea'; });
+    var memoFields = fields.filter(function(f){ return f.type === 'textarea'; });
+
+    var topHtml = topFields.map(function(f){
+      var type = f.type === 'date' ? 'date' : (f.type === 'url' ? 'url' : 'text');
+      return '<input data-field="' + f.key + '" type="' + type + '" placeholder="' + f.label + '">';
+    }).join('');
+
+    var memoHtml = memoFields.map(function(f){
+      return '<textarea class="form__memo" data-field="' + f.key + '" placeholder="' + f.label + '"></textarea>';
     }).join('');
 
     host.innerHTML =
       '<div class="card form">' +
-        '<div class="form__row">' + authorSelect + fieldHtml + '</div>' +
+        '<div class="form__row">' + topHtml + authorSelect + '</div>' +
+        (memoHtml ? '<div class="form__row">' + memoHtml + '</div>' : '') +
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
           '<span class="form__status" data-status></span>' +
           '<button class="form__submit">남기기</button>' +
@@ -533,8 +712,8 @@
     host.innerHTML =
       '<div class="card form">' +
         '<div class="form__row">' +
-          authorSelect +
           '<input data-field="title" type="date">' +
+          authorSelect +
           '<input data-field="content" type="text" placeholder="장소/메모 (선택)">' +
         '</div>' +
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
@@ -563,6 +742,104 @@
     });
   }
 
+  function buildRecordingForm(){
+    var host = document.getElementById('form-recording');
+    if(!host) return;
+    var authorSelect = '<select data-field="author">' + AUTHORS.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('') + '</select>';
+    host.innerHTML =
+      '<div class="card form">' +
+        '<div class="form__row">' +
+          authorSelect +
+          '<input data-field="title" type="text" placeholder="제목">' +
+        '</div>' +
+        '<div class="dropzone" data-dropzone tabindex="0">' +
+          '<input type="file" data-file-input accept="video/*,image/*" style="display:none;">' +
+          '<div>영상이나 사진을 여기로 드래그하거나, 탭해서 사진첩에서 선택하세요</div>' +
+          '<span class="dropzone__filename" data-filename></span>' +
+        '</div>' +
+        '<div class="form__row">' +
+          '<input data-field="link" type="url" placeholder="또는 링크 붙여넣기 (선택)">' +
+        '</div>' +
+        '<div class="form__row">' +
+          '<input data-field="content" type="text" placeholder="비고 (선택)">' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+          '<span class="form__status" data-status></span>' +
+          '<button class="form__submit">남기기</button>' +
+        '</div>' +
+      '</div>';
+
+    var status = host.querySelector('[data-status]');
+    var dropzone = host.querySelector('[data-dropzone]');
+    var fileInput = host.querySelector('[data-file-input]');
+    var filenameEl = host.querySelector('[data-filename]');
+    var selectedFile = null;
+
+    dropzone.addEventListener('click', function(){ fileInput.click(); });
+    dropzone.addEventListener('dragover', function(e){ e.preventDefault(); dropzone.classList.add('is-dragover'); });
+    dropzone.addEventListener('dragleave', function(){ dropzone.classList.remove('is-dragover'); });
+    dropzone.addEventListener('drop', function(e){
+      e.preventDefault();
+      dropzone.classList.remove('is-dragover');
+      if(e.dataTransfer.files && e.dataTransfer.files[0]){
+        selectedFile = e.dataTransfer.files[0];
+        filenameEl.textContent = selectedFile.name;
+      }
+    });
+    fileInput.addEventListener('change', function(){
+      if(fileInput.files && fileInput.files[0]){
+        selectedFile = fileInput.files[0];
+        filenameEl.textContent = selectedFile.name;
+      }
+    });
+
+    host.querySelector('.form__submit').addEventListener('click', function(){
+      var author = host.querySelector('[data-field="author"]').value;
+      var title = host.querySelector('[data-field="title"]').value.trim();
+      var content = host.querySelector('[data-field="content"]').value;
+      var link = host.querySelector('[data-field="link"]').value;
+
+      if(!title){ status.textContent = '제목을 입력해주세요'; return; }
+      if(!API_URL){ status.textContent = '백엔드 연결 전이에요 (SETUP.md 참고)'; return; }
+
+      function afterSuccess(finalLink){
+        STORE.recording.push({ category:'recording', author: author, title: title, content: content, link: finalLink, timestamp: new Date().toISOString() });
+        renderEntries('recording');
+        status.textContent = '저장됨';
+        host.querySelector('[data-field="title"]').value = '';
+        host.querySelector('[data-field="content"]').value = '';
+        host.querySelector('[data-field="link"]').value = '';
+        selectedFile = null;
+        filenameEl.textContent = '';
+        setTimeout(function(){ status.textContent = ''; }, 2000);
+      }
+
+      if(selectedFile){
+        if(!/^image\//.test(selectedFile.type) && selectedFile.size > MAX_UPLOAD_MB * 1024 * 1024){
+          status.textContent = '파일이 너무 커요 (' + MAX_UPLOAD_MB + 'MB 이하로 올려주세요)';
+          return;
+        }
+        status.textContent = '업로드 중... (영상은 시간이 좀 걸려요)';
+        resizeImageFile(selectedFile, 1600, 0.82).then(function(f){
+          return fileToBase64(f).then(function(b64){
+            return postEntry({ key: PASSPHRASE, category: 'recording', author: author, title: title, content: content, filename: f.name, mimeType: f.type, fileData: b64 });
+          });
+        }).then(function(res){
+          afterSuccess(res.link || '');
+        }).catch(function(err){
+          status.textContent = '업로드 실패: ' + err.message;
+        });
+        return;
+      }
+
+      if(!link){ status.textContent = '파일을 선택하거나 링크를 입력해주세요'; return; }
+      status.textContent = '저장 중...';
+      postEntry({ key: PASSPHRASE, category: 'recording', author: author, title: title, content: content, link: link })
+        .then(function(){ afterSuccess(link); })
+        .catch(function(err){ status.textContent = '저장 실패: ' + err.message; });
+    });
+  }
+
   function renderAll(){
     ['minutes','journal','recording'].forEach(renderEntries);
     renderSongs();
@@ -575,6 +852,7 @@
     Object.keys(FORM_FIELDS).forEach(buildForm);
     buildSongForm();
     buildScheduleForm();
+    buildRecordingForm();
     renderAll();
     loadData().then(renderAll).catch(function(err){
       console.error('load failed', err);

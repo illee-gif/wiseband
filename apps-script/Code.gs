@@ -36,10 +36,27 @@ function doPost(e) {
   if (data.key !== SHARED_KEY) {
     return jsonOutput({ error: 'unauthorized' });
   }
+
+  var link = data.link || '';
+  if (data.fileData) {
+    try {
+      var blob = Utilities.newBlob(
+        Utilities.base64Decode(data.fileData),
+        data.mimeType || 'application/octet-stream',
+        data.filename || 'file'
+      );
+      var file = getUploadFolder(data.category).createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      link = file.getUrl();
+    } catch (err) {
+      return jsonOutput({ error: 'upload_failed', message: String(err) });
+    }
+  }
+
   var sheet = getSheet();
   // "2026-08-15" 같은 날짜 형식 문자열을 시트가 자동으로 날짜 셀로 바꿔버리는 걸 막기 위해
   // 값을 쓰기 전에 셀 서식을 텍스트로 고정해둡니다.
-  var range = sheet.getRange(sheet.getLastRow() + 1, 1, 1, 6);
+  var range = sheet.getRange(sheet.getLastRow() + 1, 1, 1, 7);
   range.setNumberFormat('@');
   range.setValues([[
     new Date().toISOString(),
@@ -47,9 +64,22 @@ function doPost(e) {
     data.author || '',
     data.title || '',
     data.content || '',
-    data.link || ''
+    link,
+    data.part || ''
   ]]);
-  return jsonOutput({ ok: true });
+  return jsonOutput({ ok: true, link: link });
+}
+
+var UPLOAD_FOLDERS = {
+  score: '이스린생활_악보',
+  recording: '이스린생활_연습기록'
+};
+
+function getUploadFolder(category) {
+  var name = UPLOAD_FOLDERS[category] || '이스린생활_기타자료';
+  var folders = DriveApp.getFoldersByName(name);
+  if (folders.hasNext()) return folders.next();
+  return DriveApp.createFolder(name);
 }
 
 // 시트에 이미 날짜 셀로 저장된 값이 있어도 안전하게 문자열로 돌려줍니다.
@@ -65,7 +95,14 @@ function getSheet() {
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(['timestamp', 'category', 'author', 'title', 'content', 'link']);
+    sheet.appendRow(['timestamp', 'category', 'author', 'title', 'content', 'link', 'part']);
+    return sheet;
+  }
+  // 예전에 만들어진 시트에는 'part' 칸이 없을 수 있어서, 없으면 자동으로 추가해줍니다.
+  var lastCol = sheet.getLastColumn();
+  var header = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+  if (header.indexOf('part') === -1) {
+    sheet.getRange(1, header.length + 1).setValue('part');
   }
   return sheet;
 }
@@ -74,4 +111,10 @@ function jsonOutput(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// 드라이브 쓰기 권한을 승인받기 위한 용도입니다. 에디터에서 이 함수를 선택해 한 번 실행해주세요.
+function grantDrivePermission() {
+  var folder = DriveApp.createFolder('__permission_test__');
+  folder.setTrashed(true);
 }
