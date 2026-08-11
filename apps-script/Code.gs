@@ -37,6 +37,10 @@ function doPost(e) {
     return jsonOutput({ error: 'unauthorized' });
   }
 
+  if (data.action === 'delete') {
+    return handleDelete(data);
+  }
+
   var link = data.link || '';
   if (data.fileData) {
     try {
@@ -68,6 +72,30 @@ function doPost(e) {
     data.part || ''
   ]]);
   return jsonOutput({ ok: true, link: link });
+}
+
+function handleDelete(data) {
+  var sheet = getSheet();
+  var values = sheet.getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === String(data.timestamp)) {
+      trashDriveFileIfAny(values[i][5]);
+      sheet.deleteRow(i + 1);
+      return jsonOutput({ ok: true });
+    }
+  }
+  return jsonOutput({ error: 'not_found' });
+}
+
+function trashDriveFileIfAny(link) {
+  if (!link) return;
+  var m = String(link).match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (!m) return;
+  try {
+    DriveApp.getFileById(m[1]).setTrashed(true);
+  } catch (err) {
+    // 이미 지워졌거나 접근 권한이 없어도 시트 행 삭제는 계속 진행합니다.
+  }
 }
 
 var UPLOAD_FOLDERS = {

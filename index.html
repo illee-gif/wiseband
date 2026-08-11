@@ -107,7 +107,9 @@
 
   /* entry list + form */
   .entries{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
-  .entry{display:flex;gap:16px;padding:16px 18px;}
+  .entry{display:flex;gap:16px;padding:16px 18px;align-items:flex-start;}
+  .del-btn{border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:13px;line-height:1;padding:4px 6px;border-radius:6px;flex:none;}
+  .del-btn:hover{color:var(--guitar);background:color-mix(in srgb, var(--guitar) 12%, transparent);}
   .entry__date{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);flex:none;width:76px;padding-top:2px;}
   .entry__body{flex:1;min-width:0;}
   .entry__meta{font-size:12px;color:var(--text-muted);margin-bottom:3px;}
@@ -149,7 +151,8 @@
   .score-part:first-child{margin-top:0;}
   .score-part__tag{display:inline-block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor;border-radius:999px;padding:1px 8px;margin-bottom:5px;}
 
-  .video-card{display:flex;gap:10px;align-items:flex-start;text-decoration:none;color:var(--text);padding:6px 0;}
+  .video-card-row{display:flex;align-items:flex-start;gap:4px;}
+  .video-card{display:flex;gap:10px;align-items:flex-start;text-decoration:none;color:var(--text);padding:6px 0;flex:1;min-width:0;}
   .video-card__thumb{position:relative;flex:none;width:104px;border-radius:6px;overflow:hidden;background:var(--border);}
   .video-card__thumb img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;}
   .video-card__play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;background:rgba(0,0,0,.18);text-shadow:0 1px 4px rgba(0,0,0,.5);}
@@ -331,6 +334,7 @@
           '<div class="entry__title">' + escapeHtml(it.title || '') + '</div>' +
           content + link +
         '</div>' +
+        '<button class="del-btn" data-del="' + category + '|' + escapeAttr(it.timestamp) + '" title="삭제">✕</button>' +
       '</div>';
     }).join('');
   }
@@ -345,7 +349,8 @@
     var tints = ["vocal","drums","guitar","bass"];
     el.innerHTML = items.slice().reverse().map(function(it, i){
       var tint = tints[i % tints.length];
-      return '<div class="note" style="background:color-mix(in srgb, var(--' + tint + ') 14%, var(--bg-alt));">' +
+      return '<div class="note" style="background:color-mix(in srgb, var(--' + tint + ') 14%, var(--bg-alt));position:relative;">' +
+        '<button class="del-btn" style="position:absolute;top:6px;right:6px;" data-del="cheer|' + escapeAttr(it.timestamp) + '" title="삭제">✕</button>' +
         escapeHtml(it.content || '') +
         '<div class="note__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</div>' +
       '</div>';
@@ -395,7 +400,8 @@
       var links = byPart[p].slice().reverse().map(function(it){
         var note = it.content ? ' <span class="song-link__note">— ' + escapeHtml(it.content) + '</span>' : '';
         return '<div class="song-link"><a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">보기 →</a>' + note +
-          '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span></div>';
+          '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span>' +
+          '<button class="del-btn" data-del="score|' + escapeAttr(it.timestamp) + '" title="삭제">✕</button></div>';
       }).join('');
       return '<div class="score-part"><span class="score-part__tag" style="color:' + color + '">' + label + '</span>' +
         '<div class="song-card__links">' + links + '</div></div>';
@@ -409,22 +415,25 @@
     return m ? m[1] : null;
   }
 
-  function songGroup(label, color, items, isVideo){
+  function songGroup(label, color, items, category){
     if(!items.length) return '';
     var links = items.slice().reverse().map(function(it){
-      var yid = isVideo ? youtubeId(it.link) : null;
+      var yid = category === 'video' ? youtubeId(it.link) : null;
+      var delBtn = '<button class="del-btn" data-del="' + category + '|' + escapeAttr(it.timestamp) + '" title="삭제">✕</button>';
       if(yid){
         var note = it.content ? '<div class="video-card__note">' + escapeHtml(it.content) + '</div>' : '';
-        return '<a class="video-card" href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">' +
-          '<div class="video-card__thumb"><img src="https://img.youtube.com/vi/' + yid + '/mqdefault.jpg" alt="" loading="lazy"><span class="video-card__play">▶</span></div>' +
-          '<div class="video-card__body">' + note +
-            '<div class="video-card__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</div>' +
-          '</div>' +
-        '</a>';
+        return '<div class="video-card-row">' +
+          '<a class="video-card" href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">' +
+            '<div class="video-card__thumb"><img src="https://img.youtube.com/vi/' + yid + '/mqdefault.jpg" alt="" loading="lazy"><span class="video-card__play">▶</span></div>' +
+            '<div class="video-card__body">' + note +
+              '<div class="video-card__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</div>' +
+            '</div>' +
+          '</a>' + delBtn +
+        '</div>';
       }
       var note = it.content ? ' <span class="song-link__note">— ' + escapeHtml(it.content) + '</span>' : '';
       return '<div class="song-link"><a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">보기 →</a>' + note +
-        '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span></div>';
+        '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span>' + delBtn + '</div>';
     }).join('');
     return '<div class="song-card__group">' +
       '<div class="song-card__label" style="color:' + color + '">' + label + '</div>' +
@@ -452,7 +461,7 @@
       return '<div class="card song-card">' +
         '<div class="song-card__title">' + escapeHtml(name) + '</div>' +
         scoreGroup(songs[name].score) +
-        songGroup('참고 영상', 'var(--drums)', songs[name].video, true) +
+        songGroup('참고 영상', 'var(--drums)', songs[name].video, 'video') +
       '</div>';
     }).join('');
   }
@@ -676,6 +685,34 @@
     });
   }
 
+  function deleteEntry(category, timestamp){
+    return postEntry({ key: PASSPHRASE, action: 'delete', timestamp: timestamp }).then(function(res){
+      STORE[category] = STORE[category].filter(function(it){ return it.timestamp !== timestamp; });
+      return res;
+    });
+  }
+
+  function bindDeleteHandlers(container){
+    if(!container || container.dataset.delBound) return;
+    container.dataset.delBound = '1';
+    container.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-del]');
+      if(!btn || !container.contains(btn)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if(!API_URL){ alert('백엔드 연결 전이에요 (SETUP.md 참고)'); return; }
+      if(!confirm('삭제할까요? 되돌릴 수 없어요.')) return;
+      var parts = btn.getAttribute('data-del').split('|');
+      var category = parts[0], ts = parts[1];
+      btn.textContent = '···';
+      deleteEntry(category, ts).then(function(){
+        renderAll();
+      }).catch(function(err){
+        alert('삭제 실패: ' + err.message);
+      });
+    });
+  }
+
   function loadData(){
     if(!API_URL) return Promise.resolve();
     return fetch(API_URL + '?key=' + encodeURIComponent(PASSPHRASE))
@@ -702,7 +739,8 @@
     var label = (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
     var dday = diffDays === 0 ? 'D-DAY' : (diffDays > 0 ? ('D-' + diffDays) : '지난 연습');
     var note = latest.content ? '<div class="status-card__note">' + escapeHtml(latest.content) + '</div>' : '';
-    el.innerHTML = label + '<span class="dday">' + dday + '</span>' + note;
+    var delBtn = '<button class="del-btn" data-del="schedule|' + escapeAttr(latest.timestamp) + '" title="삭제">✕</button>';
+    el.innerHTML = label + '<span class="dday">' + dday + '</span>' + delBtn + note;
   }
 
   function buildScheduleForm(){
@@ -853,6 +891,10 @@
     buildSongForm();
     buildScheduleForm();
     buildRecordingForm();
+    ['list-minutes','list-journal','list-recording','wall-cheer','songs-grid'].forEach(function(id){
+      bindDeleteHandlers(document.getElementById(id));
+    });
+    bindDeleteHandlers(document.getElementById('schedule-value').closest('.status-card'));
     renderAll();
     loadData().then(renderAll).catch(function(err){
       console.error('load failed', err);
