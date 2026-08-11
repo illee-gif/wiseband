@@ -41,6 +41,10 @@ function doPost(e) {
     return handleDelete(data);
   }
 
+  if (data.action === 'update') {
+    return handleUpdate(data);
+  }
+
   var link = data.link || '';
   if (data.fileData) {
     try {
@@ -81,6 +85,27 @@ function handleDelete(data) {
     if (String(values[i][0]) === String(data.timestamp)) {
       trashDriveFileIfAny(values[i][5]);
       sheet.deleteRow(i + 1);
+      return jsonOutput({ ok: true });
+    }
+  }
+  return jsonOutput({ error: 'not_found' });
+}
+
+function handleUpdate(data) {
+  var sheet = getSheet();
+  var values = sheet.getDataRange().getValues();
+  var header = values[0];
+  var editableFields = ['author', 'title', 'content', 'link', 'part'];
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === String(data.timestamp)) {
+      var rowIndex = i + 1;
+      editableFields.forEach(function (field) {
+        if (data[field] === undefined) return;
+        var col = header.indexOf(field) + 1;
+        if (col > 0) {
+          sheet.getRange(rowIndex, col).setNumberFormat('@').setValue(data[field]);
+        }
+      });
       return jsonOutput({ ok: true });
     }
   }

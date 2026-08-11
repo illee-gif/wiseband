@@ -135,30 +135,50 @@
   .dropzone.is-dragover{border-color:var(--guitar);background:color-mix(in srgb, var(--guitar) 8%, transparent);color:var(--guitar);}
   .dropzone__filename{display:block;margin-top:8px;font-family:var(--font-mono);font-size:12px;color:var(--text);}
 
-  .songs{display:flex;flex-direction:column;gap:12px;margin-bottom:14px;}
-  .song-card{padding:18px 20px;}
-  .song-card__title{font-family:var(--font-display);font-size:18px;font-weight:600;margin-bottom:12px;}
-  .song-card__group{margin-top:10px;}
-  .song-card__group:first-of-type{margin-top:0;}
-  .song-card__label{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
-  .song-card__links{display:flex;flex-direction:column;gap:4px;}
-  .song-link{font-size:13.5px;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;}
-  .song-link a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border);font-weight:600;}
-  .song-link__note{color:var(--text-muted);}
-  .song-link__meta{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:auto;}
+  .modal{position:fixed;inset:0;background:rgba(10,9,7,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal.is-open{display:flex;}
+  .modal__frame{background:var(--bg-alt);border:1px solid var(--border);border-radius:14px;max-width:420px;width:100%;max-height:86vh;overflow:auto;padding:24px;position:relative;box-shadow:var(--shadow);}
+  .modal__close{position:absolute;top:10px;right:12px;border:none;background:none;font-size:20px;color:var(--text-muted);cursor:pointer;padding:6px;line-height:1;}
+  .modal__label{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;}
+  #edit-modal-fields{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
 
-  .score-part{margin-top:10px;}
-  .score-part:first-child{margin-top:0;}
-  .score-part__tag{display:inline-block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor;border-radius:999px;padding:1px 8px;margin-bottom:5px;}
+  .songs{margin-bottom:14px;}
+  .song-list{background:var(--bg-alt);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+  .song-row{display:grid;grid-template-columns:140px 1fr 1fr;gap:18px;padding:16px 18px;border-top:1px solid var(--border);align-items:start;}
+  .song-row:first-child{border-top:none;}
+  .song-row__title{font-family:var(--font-display);font-weight:600;font-size:15.5px;padding-top:4px;text-wrap:balance;}
+  .song-row__label{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px;}
+  .col-empty{color:var(--text-muted);font-size:13px;}
 
-  .video-card-row{display:flex;align-items:flex-start;gap:4px;}
-  .video-card{display:flex;gap:10px;align-items:flex-start;text-decoration:none;color:var(--text);padding:6px 0;flex:1;min-width:0;}
-  .video-card__thumb{position:relative;flex:none;width:104px;border-radius:6px;overflow:hidden;background:var(--border);}
-  .video-card__thumb img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;}
-  .video-card__play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;background:rgba(0,0,0,.18);text-shadow:0 1px 4px rgba(0,0,0,.5);}
-  .video-card__body{flex:1;min-width:0;padding-top:1px;}
-  .video-card__note{font-size:13px;color:var(--text);}
-  .video-card__meta{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:4px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{display:inline-flex;align-items:center;gap:2px;border:1px solid;border-radius:999px;padding:3px 4px 3px 10px;font-size:12.5px;}
+  .chip a{color:inherit;text-decoration:none;font-weight:600;}
+  .video-chip{display:inline-flex;align-items:center;gap:2px;}
+  .video-chip a{position:relative;display:block;width:68px;border-radius:6px;overflow:hidden;flex:none;}
+  .video-chip img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:var(--border);}
+  .video-chip__play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;background:rgba(0,0,0,.2);}
+
+  .item-controls{display:inline-flex;flex:none;}
+  .item-controls .del-btn{padding:2px 4px;font-size:10.5px;}
+
+  .wishlist{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+  .wish-card{position:relative;}
+  .wish-card__thumb{position:relative;border-radius:10px;overflow:hidden;background:var(--border);}
+  .wish-card__thumb img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;}
+  .wish-card__play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;background:rgba(0,0,0,.15);text-shadow:0 1px 4px rgba(0,0,0,.5);}
+  .wish-card__title{font-size:13.5px;font-weight:600;margin-top:8px;}
+  .wish-card__link{font-size:12.5px;color:var(--guitar);}
+  .wish-card__controls{position:absolute;top:6px;right:6px;}
+  .wish-card__controls .del-btn{background:rgba(10,9,7,.55);color:#fff;border-radius:6px;}
+  .wish-card__controls .del-btn:hover{background:rgba(10,9,7,.75);color:#fff;}
+
+  @media (max-width:720px){
+    .wishlist{grid-template-columns:repeat(2,1fr);}
+  }
+
+  @media (max-width:720px){
+    .song-row{grid-template-columns:1fr;gap:10px;}
+  }
 
   .wall{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
   .note{padding:18px 16px;border-radius:4px 4px 10px 4px;font-size:13.5px;line-height:1.55;box-shadow:var(--shadow);min-height:100px;}
@@ -252,6 +272,13 @@
   </section>
 
   <section class="module" data-reveal>
+    <div class="module__head"><span class="module__tab" style="background:var(--vocal)"></span><h2 class="module__title">언젠가 해봤으면 하는 곡들</h2></div>
+    <p class="module__hint">나중에 도전해보고 싶은 곡의 유튜브 링크를 모아두는 곳.</p>
+    <div id="wishlist-grid" class="wishlist"></div>
+    <div id="form-wishlist"></div>
+  </section>
+
+  <section class="module" data-reveal>
     <div class="module__head"><span class="module__tab" style="background:var(--bass)"></span><h2 class="module__title">우리 연습 기록</h2></div>
     <p class="module__hint">실제로 합주하거나 개인 연습한 영상·사진. 드래그하거나 스마트폰 사진첩에서 바로 올리면 구글 드라이브에 저장돼요 (또는 링크만 붙여넣어도 돼요).</p>
     <div id="list-recording" class="entries"></div>
@@ -271,6 +298,18 @@
   <p>재성 · 채진 · 일 · 지원 — 넷의 소리가 모이는 곳</p>
   <p>이 페이지는 암호로 잠겨 있어요</p>
 </footer>
+
+<div class="modal" id="edit-modal">
+  <div class="modal__frame">
+    <button class="modal__close" aria-label="닫기">&times;</button>
+    <div class="modal__label">수정하기</div>
+    <div id="edit-modal-fields"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px;">
+      <span class="form__status" id="edit-modal-status"></span>
+      <button class="form__submit" id="edit-modal-save">저장</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -307,7 +346,7 @@
   if(alreadyUnlocked){ gate.style.display = 'none'; }
 
   // ====== 데이터 ======
-  var STORE = { minutes:[], journal:[], score:[], video:[], recording:[], cheer:[], schedule:[] };
+  var STORE = { minutes:[], journal:[], score:[], video:[], recording:[], cheer:[], schedule:[], wishlist:[] };
 
   function fmtDate(iso){
     try{
@@ -334,7 +373,7 @@
           '<div class="entry__title">' + escapeHtml(it.title || '') + '</div>' +
           content + link +
         '</div>' +
-        '<button class="del-btn" data-del="' + category + '|' + escapeAttr(it.timestamp) + '" title="삭제">✕</button>' +
+        itemControls(category, it.timestamp) +
       '</div>';
     }).join('');
   }
@@ -350,7 +389,7 @@
     el.innerHTML = items.slice().reverse().map(function(it, i){
       var tint = tints[i % tints.length];
       return '<div class="note" style="background:color-mix(in srgb, var(--' + tint + ') 14%, var(--bg-alt));position:relative;">' +
-        '<button class="del-btn" style="position:absolute;top:6px;right:6px;" data-del="cheer|' + escapeAttr(it.timestamp) + '" title="삭제">✕</button>' +
+        '<span style="position:absolute;top:6px;right:6px;">' + itemControls('cheer', it.timestamp) + '</span>' +
         escapeHtml(it.content || '') +
         '<div class="note__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</div>' +
       '</div>';
@@ -371,6 +410,19 @@
     cheer:     [{key:'content', label:'메시지', type:'textarea'}]
   };
 
+  var EDIT_FIELDS = {
+    minutes:   [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'내용', type:'textarea'}],
+    journal:   [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'오늘 어땠는지', type:'textarea'}],
+    cheer:     [{key:'content', label:'메시지', type:'textarea'}],
+    schedule:  [{key:'title', label:'날짜', type:'date'}, {key:'content', label:'장소/메모', type:'text'}],
+    score:     [{key:'title', label:'곡명', type:'text'}, {key:'part', label:'파트', type:'select', options:[['vocal','보컬 (일반)'],['guitar','일렉'],['drums','드럼'],['bass','베이스']]}, {key:'content', label:'비고', type:'text'}],
+    video:     [{key:'title', label:'곡명', type:'text'}, {key:'link', label:'링크', type:'url'}, {key:'content', label:'비고', type:'text'}],
+    recording: [{key:'title', label:'제목', type:'text'}, {key:'link', label:'링크', type:'url'}, {key:'content', label:'비고', type:'text'}],
+    wishlist:  [{key:'title', label:'제목/메모', type:'text'}, {key:'link', label:'유튜브 링크', type:'url'}]
+  };
+
+  var SKIP_AUTHOR = { wishlist: true };
+
   function songKey(title){ return (title || '').trim() || '(제목 없음)'; }
 
   function updateSongNames(){
@@ -384,29 +436,11 @@
   var PART_LABELS = { vocal: '보컬 (일반)', guitar: '일렉', drums: '드럼', bass: '베이스' };
   var PART_ORDER = ['vocal', 'guitar', 'drums', 'bass'];
 
-  function scoreGroup(items){
-    if(!items.length) return '';
-    var byPart = {};
-    items.forEach(function(it){
-      var p = PART_LABELS[it.part] ? it.part : 'etc';
-      if(!byPart[p]) byPart[p] = [];
-      byPart[p].push(it);
-    });
-    var order = PART_ORDER.filter(function(p){ return byPart[p]; });
-    if(byPart.etc) order.push('etc');
-    var body = order.map(function(p){
-      var label = PART_LABELS[p] || '기타 파일';
-      var color = 'var(--' + (p === 'etc' ? 'text-muted' : p) + ')';
-      var links = byPart[p].slice().reverse().map(function(it){
-        var note = it.content ? ' <span class="song-link__note">— ' + escapeHtml(it.content) + '</span>' : '';
-        return '<div class="song-link"><a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">보기 →</a>' + note +
-          '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span>' +
-          '<button class="del-btn" data-del="score|' + escapeAttr(it.timestamp) + '" title="삭제">✕</button></div>';
-      }).join('');
-      return '<div class="score-part"><span class="score-part__tag" style="color:' + color + '">' + label + '</span>' +
-        '<div class="song-card__links">' + links + '</div></div>';
-    }).join('');
-    return '<div class="song-card__group"><div class="song-card__label" style="color:var(--guitar)">악보</div>' + body + '</div>';
+  function itemControls(category, ts){
+    return '<span class="item-controls">' +
+      '<button class="del-btn" data-edit="' + category + '|' + escapeAttr(ts) + '" title="수정">✎</button>' +
+      '<button class="del-btn" data-del="' + category + '|' + escapeAttr(ts) + '" title="삭제">✕</button>' +
+    '</span>';
   }
 
   function youtubeId(url){
@@ -415,30 +449,49 @@
     return m ? m[1] : null;
   }
 
-  function songGroup(label, color, items, category){
-    if(!items.length) return '';
-    var links = items.slice().reverse().map(function(it){
-      var yid = category === 'video' ? youtubeId(it.link) : null;
-      var delBtn = '<button class="del-btn" data-del="' + category + '|' + escapeAttr(it.timestamp) + '" title="삭제">✕</button>';
-      if(yid){
-        var note = it.content ? '<div class="video-card__note">' + escapeHtml(it.content) + '</div>' : '';
-        return '<div class="video-card-row">' +
-          '<a class="video-card" href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">' +
-            '<div class="video-card__thumb"><img src="https://img.youtube.com/vi/' + yid + '/mqdefault.jpg" alt="" loading="lazy"><span class="video-card__play">▶</span></div>' +
-            '<div class="video-card__body">' + note +
-              '<div class="video-card__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</div>' +
-            '</div>' +
-          '</a>' + delBtn +
-        '</div>';
-      }
-      var note = it.content ? ' <span class="song-link__note">— ' + escapeHtml(it.content) + '</span>' : '';
-      return '<div class="song-link"><a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">보기 →</a>' + note +
-        '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span>' + delBtn + '</div>';
+  function scoreChips(items){
+    if(!items.length) return '<span class="col-empty">—</span>';
+    var byPart = {};
+    items.forEach(function(it){
+      var p = PART_LABELS[it.part] ? it.part : 'etc';
+      if(!byPart[p]) byPart[p] = [];
+      byPart[p].push(it);
+    });
+    var order = PART_ORDER.filter(function(p){ return byPart[p]; });
+    if(byPart.etc) order.push('etc');
+    var chips = order.map(function(p){
+      var label = PART_LABELS[p] || '기타';
+      var color = 'var(--' + (p === 'etc' ? 'text-muted' : p) + ')';
+      return byPart[p].slice().reverse().map(function(it){
+        return '<span class="chip" style="color:' + color + ';border-color:' + color + '" title="' + escapeAttr(it.author || '') + ' · ' + fmtDate(it.timestamp) + (it.content ? ' — ' + escapeAttr(it.content) : '') + '">' +
+          '<a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">' + label + '</a>' +
+          itemControls('score', it.timestamp) +
+        '</span>';
+      }).join('');
     }).join('');
-    return '<div class="song-card__group">' +
-      '<div class="song-card__label" style="color:' + color + '">' + label + '</div>' +
-      '<div class="song-card__links">' + links + '</div>' +
-    '</div>';
+    return '<div class="chip-row">' + chips + '</div>';
+  }
+
+  function videoChips(items){
+    if(!items.length) return '<span class="col-empty">—</span>';
+    var chips = items.slice().reverse().map(function(it){
+      var yid = youtubeId(it.link);
+      var titleAttr = escapeAttr((it.author || '') + ' · ' + fmtDate(it.timestamp) + (it.content ? ' — ' + it.content : ''));
+      if(yid){
+        return '<span class="video-chip" title="' + titleAttr + '">' +
+          '<a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">' +
+            '<img src="https://img.youtube.com/vi/' + yid + '/default.jpg" alt="" loading="lazy">' +
+            '<span class="video-chip__play">▶</span>' +
+          '</a>' +
+          itemControls('video', it.timestamp) +
+        '</span>';
+      }
+      return '<span class="chip" style="color:var(--drums);border-color:var(--drums)" title="' + titleAttr + '">' +
+        '<a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">링크</a>' +
+        itemControls('video', it.timestamp) +
+      '</span>';
+    }).join('');
+    return '<div class="chip-row">' + chips + '</div>';
   }
 
   function renderSongs(){
@@ -457,13 +510,77 @@
       el.innerHTML = '<div class="empty"><strong>아직 곡이 없어요</strong>아래에서 첫 곡의 악보나 참고 영상을 추가해보세요.</div>';
       return;
     }
-    el.innerHTML = order.map(function(name){
-      return '<div class="card song-card">' +
-        '<div class="song-card__title">' + escapeHtml(name) + '</div>' +
-        scoreGroup(songs[name].score) +
-        songGroup('참고 영상', 'var(--drums)', songs[name].video, 'video') +
+    el.innerHTML = '<div class="song-list">' + order.map(function(name){
+      return '<div class="song-row">' +
+        '<div class="song-row__title">' + escapeHtml(name) + '</div>' +
+        '<div>' +
+          '<div class="song-row__label" style="color:var(--guitar)">악보</div>' +
+          scoreChips(songs[name].score) +
+        '</div>' +
+        '<div>' +
+          '<div class="song-row__label" style="color:var(--drums)">참고 영상</div>' +
+          videoChips(songs[name].video) +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  function renderWishlist(){
+    var el = document.getElementById('wishlist-grid');
+    if(!el) return;
+    var items = STORE.wishlist;
+    if(!items.length){
+      el.innerHTML = '<div class="empty"><strong>아직 없어요</strong>언젠가 해보고 싶은 곡의 유튜브 링크를 추가해보세요.</div>';
+      return;
+    }
+    el.innerHTML = items.slice().reverse().map(function(it){
+      var yid = youtubeId(it.link);
+      var titleHtml = it.title ? '<div class="wish-card__title">' + escapeHtml(it.title) + '</div>' : '';
+      var body = yid
+        ? '<div class="wish-card__thumb"><img src="https://img.youtube.com/vi/' + yid + '/mqdefault.jpg" alt="" loading="lazy"><span class="wish-card__play">▶</span></div>'
+        : '<div class="wish-card__link">🔗 링크</div>';
+      return '<div class="wish-card">' +
+        '<a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">' + body + '</a>' +
+        titleHtml +
+        '<div class="wish-card__controls">' + itemControls('wishlist', it.timestamp) + '</div>' +
       '</div>';
     }).join('');
+  }
+
+  function buildWishlistForm(){
+    var host = document.getElementById('form-wishlist');
+    if(!host) return;
+    host.innerHTML =
+      '<div class="card form">' +
+        '<div class="form__row">' +
+          '<input data-field="title" type="text" placeholder="제목/메모 (선택)">' +
+          '<input data-field="link" type="url" placeholder="유튜브 링크">' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+          '<span class="form__status" data-status></span>' +
+          '<button class="form__submit">추가하기</button>' +
+        '</div>' +
+      '</div>';
+
+    var status = host.querySelector('[data-status]');
+    host.querySelector('.form__submit').addEventListener('click', function(){
+      var title = host.querySelector('[data-field="title"]').value.trim();
+      var link = host.querySelector('[data-field="link"]').value.trim();
+      if(!link){ status.textContent = '링크를 입력해주세요'; return; }
+      if(!API_URL){ status.textContent = '백엔드 연결 전이에요 (SETUP.md 참고)'; return; }
+      status.textContent = '저장 중...';
+      postEntry({ key: PASSPHRASE, category: 'wishlist', author: '', title: title, content: '', link: link })
+        .then(function(){
+          STORE.wishlist.push({ category:'wishlist', author:'', title: title, content:'', link: link, timestamp: new Date().toISOString() });
+          renderWishlist();
+          status.textContent = '저장됨';
+          host.querySelector('[data-field="title"]').value = '';
+          host.querySelector('[data-field="link"]').value = '';
+          setTimeout(function(){ status.textContent = ''; }, 2000);
+        }).catch(function(err){
+          status.textContent = '저장 실패: ' + err.message;
+        });
+    });
   }
 
   function resizeImageFile(file, maxSize, quality){
@@ -685,6 +802,39 @@
     });
   }
 
+  function openEditModal(category, item){
+    var modal = document.getElementById('edit-modal');
+    if(!modal) return;
+    var fieldsHost = document.getElementById('edit-modal-fields');
+    var fields = EDIT_FIELDS[category] || [];
+    var authorSelect = '<select data-field="author">' + AUTHORS.map(function(a){
+      return '<option value="' + a + '"' + (a === item.author ? ' selected' : '') + '>' + a + '</option>';
+    }).join('') + '</select>';
+
+    var rows = SKIP_AUTHOR[category] ? [] : ['<div class="form__row">' + authorSelect + '</div>'];
+    fields.forEach(function(f){
+      var val = item[f.key] || '';
+      var control;
+      if(f.type === 'textarea'){
+        control = '<textarea class="form__memo" data-field="' + f.key + '" placeholder="' + f.label + '">' + escapeHtml(val) + '</textarea>';
+      } else if(f.type === 'select'){
+        control = '<select data-field="' + f.key + '">' + f.options.map(function(o){
+          return '<option value="' + o[0] + '"' + (o[0] === val ? ' selected' : '') + '>' + o[1] + '</option>';
+        }).join('') + '</select>';
+      } else {
+        var type = f.type === 'date' ? 'date' : (f.type === 'url' ? 'url' : 'text');
+        control = '<input data-field="' + f.key + '" type="' + type + '" value="' + escapeAttr(val) + '" placeholder="' + f.label + '">';
+      }
+      rows.push('<div class="form__row">' + control + '</div>');
+    });
+    fieldsHost.innerHTML = rows.join('');
+
+    modal.dataset.category = category;
+    modal.dataset.timestamp = item.timestamp;
+    document.getElementById('edit-modal-status').textContent = '';
+    modal.classList.add('is-open');
+  }
+
   function deleteEntry(category, timestamp){
     return postEntry({ key: PASSPHRASE, action: 'delete', timestamp: timestamp }).then(function(res){
       STORE[category] = STORE[category].filter(function(it){ return it.timestamp !== timestamp; });
@@ -696,6 +846,16 @@
     if(!container || container.dataset.delBound) return;
     container.dataset.delBound = '1';
     container.addEventListener('click', function(e){
+      var editBtn = e.target.closest('[data-edit]');
+      if(editBtn && container.contains(editBtn)){
+        e.preventDefault();
+        e.stopPropagation();
+        var eParts = editBtn.getAttribute('data-edit').split('|');
+        var eCategory = eParts[0], eTs = eParts[1];
+        var item = (STORE[eCategory] || []).filter(function(it){ return it.timestamp === eTs; })[0];
+        if(item) openEditModal(eCategory, item);
+        return;
+      }
       var btn = e.target.closest('[data-del]');
       if(!btn || !container.contains(btn)) return;
       e.preventDefault();
@@ -739,8 +899,7 @@
     var label = (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
     var dday = diffDays === 0 ? 'D-DAY' : (diffDays > 0 ? ('D-' + diffDays) : '지난 연습');
     var note = latest.content ? '<div class="status-card__note">' + escapeHtml(latest.content) + '</div>' : '';
-    var delBtn = '<button class="del-btn" data-del="schedule|' + escapeAttr(latest.timestamp) + '" title="삭제">✕</button>';
-    el.innerHTML = label + '<span class="dday">' + dday + '</span>' + delBtn + note;
+    el.innerHTML = label + '<span class="dday">' + dday + '</span>' + itemControls('schedule', latest.timestamp) + note;
   }
 
   function buildScheduleForm(){
@@ -882,6 +1041,7 @@
     ['minutes','journal','recording'].forEach(renderEntries);
     renderSongs();
     updateSongNames();
+    renderWishlist();
     renderWall();
     renderSchedule();
   }
@@ -891,7 +1051,8 @@
     buildSongForm();
     buildScheduleForm();
     buildRecordingForm();
-    ['list-minutes','list-journal','list-recording','wall-cheer','songs-grid'].forEach(function(id){
+    buildWishlistForm();
+    ['list-minutes','list-journal','list-recording','wall-cheer','songs-grid','wishlist-grid'].forEach(function(id){
       bindDeleteHandlers(document.getElementById(id));
     });
     bindDeleteHandlers(document.getElementById('schedule-value').closest('.status-card'));
@@ -908,6 +1069,39 @@
     } else {
       document.querySelectorAll('[data-reveal]').forEach(function(el){ el.classList.add('is-visible'); });
     }
+  }
+
+  // ====== 수정 모달 ======
+  var editModal = document.getElementById('edit-modal');
+  if(editModal){
+    editModal.addEventListener('click', function(e){
+      if(e.target === editModal || e.target.classList.contains('modal__close')){
+        editModal.classList.remove('is-open');
+      }
+    });
+    document.getElementById('edit-modal-save').addEventListener('click', function(){
+      var category = editModal.dataset.category;
+      var timestamp = editModal.dataset.timestamp;
+      var payload = { key: PASSPHRASE, action: 'update', timestamp: timestamp };
+      document.querySelectorAll('#edit-modal-fields [data-field]').forEach(function(el){
+        payload[el.getAttribute('data-field')] = el.value;
+      });
+      var status = document.getElementById('edit-modal-status');
+      if(!API_URL){ status.textContent = '백엔드 연결 전이에요 (SETUP.md 참고)'; return; }
+      status.textContent = '저장 중...';
+      postEntry(payload).then(function(){
+        var item = (STORE[category] || []).filter(function(it){ return it.timestamp === timestamp; })[0];
+        if(item){
+          Object.keys(payload).forEach(function(k){
+            if(k !== 'key' && k !== 'action' && k !== 'timestamp') item[k] = payload[k];
+          });
+        }
+        editModal.classList.remove('is-open');
+        renderAll();
+      }).catch(function(err){
+        status.textContent = '저장 실패: ' + err.message;
+      });
+    });
   }
 
   if(alreadyUnlocked) boot();
