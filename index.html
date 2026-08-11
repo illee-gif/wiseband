@@ -918,7 +918,9 @@
 
   function loadData(){
     if(!API_URL) return Promise.resolve();
-    return fetch(API_URL + '?key=' + encodeURIComponent(PASSPHRASE))
+    // 브라우저가 데이터 요청을 캐시해서 옛날 내용을 계속 보여주는 걸 막기 위해 매번 다른 URL로 요청합니다.
+    var bust = '&_=' + Date.now();
+    return fetch(API_URL + '?key=' + encodeURIComponent(PASSPHRASE) + bust, { cache: 'no-store' })
       .then(function(res){ return res.json(); })
       .then(function(json){
         if(json.error) throw new Error(json.error);
