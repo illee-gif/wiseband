@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>슬기로운 이스린생활</title>
+<style>
+  :root{
+    --bg:#F3ECDD;
+    --bg-alt:#FBF8F0;
+    --text:#201C16;
+    --text-muted:#7A7466;
+    --border:#E4D9C2;
+    --vocal:#B5741A;
+    --guitar:#A23F1D;
+    --drums:#1B5A66;
+    --bass:#5C5E2E;
+    --shadow: 0 1px 2px rgba(32,28,22,.04), 0 8px 24px -12px rgba(32,28,22,.18);
+
+    --font-display: "New York","Iowan Old Style",Georgia,"Apple SD Gothic Neo",serif;
+    --font-body: -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    --font-mono: ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#12141B; --bg-alt:#1B1E29; --text:#F1ECDD; --text-muted:#A9A798; --border:#2E3140;
+      --vocal:#E8A339; --guitar:#E1794A; --drums:#4FA3B2; --bass:#A7A85A;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 28px -12px rgba(0,0,0,.55);
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;}
+  p{margin:0;}
+  button,input,textarea,select{font-family:var(--font-body);}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);}
+  .wrap{max-width:840px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- LOCK GATE ---------- */
+  .gate{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
+  .gate__card{background:var(--bg-alt);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:36px 32px;max-width:320px;width:100%;text-align:center;}
+  .gate__badge{display:inline-block;font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);border-radius:999px;padding:4px 10px;margin-bottom:16px;}
+  .gate__title{font-size:22px;margin-bottom:8px;}
+  .gate__desc{font-size:13.5px;color:var(--text-muted);margin-bottom:20px;}
+  .gate__input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:15px;margin-bottom:12px;text-align:center;}
+  .gate__input:focus{outline:2px solid var(--guitar);outline-offset:1px;}
+  .gate__submit{width:100%;padding:12px 14px;border:none;border-radius:8px;background:var(--guitar);color:#fff;font-size:15px;font-weight:600;cursor:pointer;}
+  .gate__error{display:none;color:var(--guitar);font-size:12.5px;margin-top:12px;}
+  .gate__card.shake{animation:shake .35s;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;min-height:min(92vh,760px);display:flex;flex-direction:column;justify-content:flex-end;color:#F3ECDD;overflow:hidden;isolation:isolate;}
+  .hero__img{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(180deg, rgba(15,14,10,.15) 0%, rgba(15,14,10,.35) 55%, rgba(10,9,7,.92) 100%),
+      linear-gradient(90deg, rgba(10,9,7,.55) 0%, rgba(10,9,7,0) 45%),
+      url("assets/hero.jpg");
+    background-size:cover; background-position:center 30%;
+    filter:saturate(1.05) contrast(1.02);
+    z-index:-1;
+  }
+  .hero__inner{position:relative;padding:120px 24px 48px;max-width:840px;margin:0 auto;width:100%;}
+  .hero .badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#F3ECDD;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:5px 12px;backdrop-filter:blur(6px);margin-bottom:18px;}
+  .hero .badge::before{content:"●";font-size:8px;color:#E8A339;}
+  .hero h1{font-size:clamp(40px,8vw,68px);font-weight:600;line-height:1.08;margin-bottom:16px;text-shadow:0 2px 24px rgba(0,0,0,.35);}
+  .hero__tagline{font-size:clamp(15px,2.2vw,18px);color:rgba(243,236,221,.88);max-width:520px;margin-bottom:6px;}
+  .hero__sub{font-size:13px;color:rgba(243,236,221,.6);margin-top:14px;}
+
+  /* ---------- LINEUP ---------- */
+  .lineup{margin-top:-64px;position:relative;z-index:2;}
+  .lineup__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .pass{background:var(--bg-alt);border:1px solid var(--border);border-radius:14px;padding:18px 16px;box-shadow:var(--shadow);}
+  .pass__role{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:inline-block;padding:3px 8px;border-radius:6px;margin-bottom:12px;}
+  .pass__name{font-family:var(--font-display);font-size:22px;margin-bottom:6px;}
+  .pass__desc{font-size:13px;color:var(--text-muted);}
+  .pass--vocal .pass__role{color:var(--vocal);background:color-mix(in srgb, var(--vocal) 16%, transparent);}
+  .pass--guitar .pass__role{color:var(--guitar);background:color-mix(in srgb, var(--guitar) 16%, transparent);}
+  .pass--drums .pass__role{color:var(--drums);background:color-mix(in srgb, var(--drums) 16%, transparent);}
+  .pass--bass .pass__role{color:var(--bass);background:color-mix(in srgb, var(--bass) 16%, transparent);}
+
+  /* ---------- MODULES ---------- */
+  main{padding:88px 0 40px;}
+  .module{margin-bottom:64px;scroll-margin-top:24px;}
+  .module__head{display:flex;align-items:baseline;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+  .module__tab{width:8px;height:8px;border-radius:50%;flex:none;transform:translateY(-1px);}
+  .module__title{font-size:24px;font-weight:600;flex:1;}
+  .module__hint{font-size:13.5px;color:var(--text-muted);margin-top:-8px;margin-bottom:20px;}
+  .card{background:var(--bg-alt);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);}
+
+  /* status dashboard (아직 시트 연동 없음) */
+  .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .status-card{padding:20px;}
+  .status-card__label{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
+  .status-card__value{font-family:var(--font-display);font-size:16px;color:var(--text-muted);}
+  .status-card__value .dday{display:inline-block;margin-left:8px;font-family:var(--font-mono);font-size:12px;padding:2px 8px;border-radius:999px;background:color-mix(in srgb, var(--vocal) 20%, transparent);color:var(--vocal);vertical-align:middle;}
+  .status-card__note{font-size:12.5px;color:var(--text-muted);margin-top:6px;font-family:var(--font-body);}
+
+  /* entry list + form */
+  .entries{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+  .entry{display:flex;gap:16px;padding:16px 18px;}
+  .entry__date{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);flex:none;width:76px;padding-top:2px;}
+  .entry__body{flex:1;min-width:0;}
+  .entry__meta{font-size:12px;color:var(--text-muted);margin-bottom:3px;}
+  .entry__title{font-size:15px;font-weight:600;margin-bottom:3px;}
+  .entry__content{font-size:13.5px;color:var(--text);white-space:pre-wrap;}
+  .entry__link{display:inline-block;margin-top:8px;font-size:12.5px;font-family:var(--font-mono);color:var(--guitar);text-decoration:none;border-bottom:1px solid currentColor;}
+  .empty{border:1.5px dashed var(--border);border-radius:12px;padding:26px 20px;text-align:center;color:var(--text-muted);font-size:14px;}
+  .empty strong{display:block;color:var(--text);font-family:var(--font-display);font-size:17px;font-weight:600;margin-bottom:6px;}
+
+  .form{padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+  .form__row{display:flex;gap:10px;flex-wrap:wrap;}
+  .form__row > *{flex:1;min-width:120px;}
+  .form select,.form input,.form textarea{
+    padding:10px 12px;border:1px solid var(--border);border-radius:8px;
+    background:var(--bg);color:var(--text);font-size:14px;width:100%;
+  }
+  .form textarea{resize:vertical;min-height:64px;}
+  .form__submit{align-self:flex-end;padding:10px 18px;border:none;border-radius:8px;background:var(--guitar);color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
+  .form__status{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);min-height:16px;}
+
+  .songs{display:flex;flex-direction:column;gap:12px;margin-bottom:14px;}
+  .song-card{padding:18px 20px;}
+  .song-card__title{font-family:var(--font-display);font-size:18px;font-weight:600;margin-bottom:12px;}
+  .song-card__group{margin-top:10px;}
+  .song-card__group:first-of-type{margin-top:0;}
+  .song-card__label{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .song-card__links{display:flex;flex-direction:column;gap:4px;}
+  .song-link{font-size:13.5px;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;}
+  .song-link a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border);font-weight:600;}
+  .song-link__note{color:var(--text-muted);}
+  .song-link__meta{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:auto;}
+
+  .wall{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .note{padding:18px 16px;border-radius:4px 4px 10px 4px;font-size:13.5px;line-height:1.55;box-shadow:var(--shadow);min-height:100px;}
+  .note__meta{font-family:var(--font-mono);font-size:11px;opacity:.6;margin-top:10px;}
+
+  footer{padding:56px 0 64px;text-align:center;}
+  footer p{font-size:12.5px;color:var(--text-muted);font-family:var(--font-mono);}
+  footer p+p{margin-top:6px;}
+
+  @media (max-width:720px){
+    .lineup__grid{grid-template-columns:repeat(2,1fr);}
+    .status-grid{grid-template-columns:1fr;}
+    .wall{grid-template-columns:1fr;}
+    .hero__inner{padding-top:88px;}
+    .lineup{margin-top:-40px;}
+    .entry{flex-direction:column;}
+    .entry__date{width:auto;}
+  }
+
+  [data-reveal]{opacity:0;transform:translateY(14px);transition:opacity .5s ease, transform .5s ease;}
+  [data-reveal].is-visible{opacity:1;transform:none;}
+  @media (prefers-reduced-motion: reduce){
+    [data-reveal]{opacity:1;transform:none;transition:none;}
+    .gate__card.shake{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate__card">
+    <div class="gate__badge">Private</div>
+    <h2 class="gate__title">슬기로운 이스린생활</h2>
+    <p class="gate__desc">우리 넷만 아는 암호를 입력해주세요</p>
+    <input type="password" id="gate-input" class="gate__input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="암호">
+    <button id="gate-submit" class="gate__submit">입장하기</button>
+    <p class="gate__error" id="gate-error">암호가 맞지 않아요, 다시 확인해주세요</p>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero__img"></div>
+  <div class="hero__inner">
+    <span class="badge">Private · 멤버 전용</span>
+    <h1>슬기로운<br>이스린생활</h1>
+    <p class="hero__tagline">재성의 목소리, 채진의 비트, 일의 리프, 지원의 그루브 —<br>넷이 모여 소리를 맞춰가는 기록장.</p>
+    <p class="hero__sub">회의록 · 연습일지 · 악보 · 참고 영상 · 우리 연습 기록을 한곳에.</p>
+  </div>
+</div>
+
+<div class="wrap lineup" data-reveal>
+  <div class="lineup__grid">
+    <div class="pass pass--vocal"><span class="pass__role">Vocal</span><div class="pass__name">재성</div><div class="pass__desc">멜로디를 이끄는 목소리</div></div>
+    <div class="pass pass--guitar"><span class="pass__role">Guitar</span><div class="pass__name">일</div><div class="pass__desc">리프와 텐션을 담당</div></div>
+    <div class="pass pass--drums"><span class="pass__role">Drums</span><div class="pass__name">채진</div><div class="pass__desc">밴드의 심장, 박자를 지킴</div></div>
+    <div class="pass pass--bass"><span class="pass__role">Bass</span><div class="pass__name">지원</div><div class="pass__desc">그루브의 뿌리, 로우엔드</div></div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="module" data-reveal>
+    <div class="module__head"><span class="module__tab" style="background:var(--vocal)"></span><h2 class="module__title">지금 우리는</h2></div>
+    <div class="status-grid">
+      <div class="card status-card"><div class="status-card__label">다음 연습</div><div class="status-card__value" id="schedule-value">일정이 아직 없어요</div></div>
+      <div class="card status-card"><div class="status-card__label">연습 곡</div><div class="status-card__value">첫 곡을 정해보세요</div></div>
+    </div>
+    <div id="form-schedule" style="margin-top:14px;"></div>
+  </section>
+
+  <section class="module" data-reveal>
+    <div class="module__head"><span class="module__tab" style="background:var(--guitar)"></span><h2 class="module__title">회의록</h2></div>
+    <p class="module__hint">곡 선정, 역할 분담, 공연 계획 같은 이야기를 나눈 날의 기록.</p>
+    <div id="list-minutes" class="entries"></div>
+    <div id="form-minutes"></div>
+  </section>
+
+  <section class="module" data-reveal>
+    <div class="module__head"><span class="module__tab" style="background:var(--drums)"></span><h2 class="module__title">연습일지</h2></div>
+    <p class="module__hint">합주한 날짜, 다룬 곡, 잘된 점과 다음 과제를 남겨두는 곳.</p>
+    <div id="list-journal" class="entries"></div>
+    <div id="form-journal"></div>
+  </section>
+
+  <section class="module" data-reveal>
+    <div class="module__head"><span class="module__tab" style="background:var(--guitar)"></span><h2 class="module__title">곡별 자료</h2></div>
+    <p class="module__hint">곡마다 악보와 참고 영상을 한 카드에 모아둬요. 악보는 구글 드라이브에 사진/PDF로 올린 뒤 링크를 붙여넣으세요 — 아이패드에서 두 손가락으로 확대해서 볼 수 있어요.</p>
+    <div id="songs-grid" class="songs"></div>
+    <div id="form-song"></div>
+    <datalist id="song-names"></datalist>
+  </section>
+
+  <section class="module" data-reveal>
+    <div class="module__head"><span class="module__tab" style="background:var(--bass)"></span><h2 class="module__title">우리 연습 기록</h2></div>
+    <p class="module__hint">실제로 합주하거나 개인 연습한 영상·녹음. 구글 드라이브 링크를 붙여넣어주세요.</p>
+    <div id="list-recording" class="entries"></div>
+    <div id="form-recording"></div>
+  </section>
+
+  <section class="module" data-reveal>
+    <div class="module__head"><span class="module__tab" style="background:var(--vocal)"></span><h2 class="module__title">응원 게시판</h2></div>
+    <p class="module__hint">서로에게, 그리고 스스로에게 남기는 한마디.</p>
+    <div id="wall-cheer" class="wall" style="margin-bottom:14px;"></div>
+    <div id="form-cheer"></div>
+  </section>
+
+</main>
+
+<footer>
+  <p>재성 · 채진 · 일 · 지원 — 넷의 소리가 모이는 곳</p>
+  <p>이 페이지는 암호로 잠겨 있어요</p>
+</footer>
+
+<script>
+(function(){
+  // ====== 설정 ======
+  var PASSPHRASE = "1234"; // 잠금 화면 암호. Apps Script의 SHARED_KEY와 같은 값이어야 해요.
+  var API_URL = "https://script.google.com/macros/s/AKfycbxX2Y2akrO_9y4_vRMm8R6rlUudmjmTnQ_3ozJry-pK6vNEWnG4alz17F_IjXd2ia0b/exec";
+  var AUTHORS = ["재성","채진","일","지원"];
+
+  // ====== 잠금 화면 ======
+  var gate = document.getElementById('gate');
+  var gateInput = document.getElementById('gate-input');
+  var gateSubmit = document.getElementById('gate-submit');
+  var gateError = document.getElementById('gate-error');
+
+  function unlock(){
+    try{ localStorage.setItem('esrin_unlocked','1'); }catch(e){}
+    gate.style.display = 'none';
+    boot();
+  }
+  function tryUnlock(){
+    if(gateInput.value.trim() === PASSPHRASE){ unlock(); }
+    else{
+      gateError.style.display = 'block';
+      gate.querySelector('.gate__card').classList.add('shake');
+      setTimeout(function(){ gate.querySelector('.gate__card').classList.remove('shake'); }, 400);
+    }
+  }
+  gateSubmit.addEventListener('click', tryUnlock);
+  gateInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
+
+  var alreadyUnlocked = false;
+  try{ alreadyUnlocked = localStorage.getItem('esrin_unlocked') === '1'; }catch(e){}
+  if(alreadyUnlocked){ gate.style.display = 'none'; }
+
+  // ====== 데이터 ======
+  var STORE = { minutes:[], journal:[], score:[], video:[], recording:[], cheer:[], schedule:[] };
+
+  function fmtDate(iso){
+    try{
+      var d = new Date(iso);
+      return (d.getMonth()+1) + "." + d.getDate();
+    }catch(e){ return ""; }
+  }
+
+  function renderEntries(category){
+    var el = document.getElementById('list-' + category);
+    if(!el) return;
+    var items = STORE[category];
+    if(!items.length){
+      el.innerHTML = '<div class="empty"><strong>아직 없어요</strong>아래에서 첫 기록을 남겨보세요.</div>';
+      return;
+    }
+    el.innerHTML = items.slice().reverse().map(function(it){
+      var link = it.link ? '<a class="entry__link" href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">보기 →</a>' : '';
+      var content = it.content ? '<div class="entry__content">' + escapeHtml(it.content) + '</div>' : '';
+      return '<div class="card entry">' +
+        '<div class="entry__date">' + fmtDate(it.timestamp) + '</div>' +
+        '<div class="entry__body">' +
+          '<div class="entry__meta">' + escapeHtml(it.author || '') + '</div>' +
+          '<div class="entry__title">' + escapeHtml(it.title || '') + '</div>' +
+          content + link +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderWall(){
+    var el = document.getElementById('wall-cheer');
+    var items = STORE.cheer;
+    if(!items.length){
+      el.innerHTML = '<div class="note" style="background:var(--bg-alt);border:1px dashed var(--border);color:var(--text-muted);display:flex;align-items:center;justify-content:center;text-align:center;">여기에 서로에게 한마디씩 남겨보세요</div>';
+      return;
+    }
+    var tints = ["vocal","drums","guitar","bass"];
+    el.innerHTML = items.slice().reverse().map(function(it, i){
+      var tint = tints[i % tints.length];
+      return '<div class="note" style="background:color-mix(in srgb, var(--' + tint + ') 14%, var(--bg-alt));">' +
+        escapeHtml(it.content || '') +
+        '<div class="note__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  // ====== 폼 ======
+  var FORM_FIELDS = {
+    minutes:   [{key:'title', label:'제목', type:'text'}, {key:'content', label:'내용', type:'textarea'}],
+    journal:   [{key:'title', label:'제목 (예: 연습 날짜)', type:'text'}, {key:'content', label:'오늘 어땠는지', type:'textarea'}],
+    recording: [{key:'title', label:'제목', type:'text'}, {key:'link', label:'드라이브 링크', type:'url'}, {key:'content', label:'비고 (선택)', type:'textarea'}],
+    cheer:     [{key:'content', label:'메시지', type:'textarea'}]
+  };
+
+  function songKey(title){ return (title || '').trim() || '(제목 없음)'; }
+
+  function updateSongNames(){
+    var dl = document.getElementById('song-names');
+    if(!dl) return;
+    var names = {};
+    ['score','video'].forEach(function(cat){ STORE[cat].forEach(function(it){ names[songKey(it.title)] = true; }); });
+    dl.innerHTML = Object.keys(names).map(function(n){ return '<option value="' + escapeAttr(n) + '"></option>'; }).join('');
+  }
+
+  function songGroup(label, color, items){
+    if(!items.length) return '';
+    var links = items.slice().reverse().map(function(it){
+      var note = it.content ? ' <span class="song-link__note">— ' + escapeHtml(it.content) + '</span>' : '';
+      return '<div class="song-link"><a href="' + escapeAttr(it.link) + '" target="_blank" rel="noopener">보기 →</a>' + note +
+        '<span class="song-link__meta">' + escapeHtml(it.author || '') + ' · ' + fmtDate(it.timestamp) + '</span></div>';
+    }).join('');
+    return '<div class="song-card__group">' +
+      '<div class="song-card__label" style="color:' + color + '">' + label + '</div>' +
+      '<div class="song-card__links">' + links + '</div>' +
+    '</div>';
+  }
+
+  function renderSongs(){
+    var el = document.getElementById('songs-grid');
+    if(!el) return;
+    var songs = {};
+    var order = [];
+    ['score','video'].forEach(function(cat){
+      STORE[cat].forEach(function(it){
+        var name = songKey(it.title);
+        if(!songs[name]){ songs[name] = { score: [], video: [] }; order.push(name); }
+        songs[name][cat].push(it);
+      });
+    });
+    if(!order.length){
+      el.innerHTML = '<div class="empty"><strong>아직 곡이 없어요</strong>아래에서 첫 곡의 악보나 참고 영상을 추가해보세요.</div>';
+      return;
+    }
+    el.innerHTML = order.map(function(name){
+      return '<div class="card song-card">' +
+        '<div class="song-card__title">' + escapeHtml(name) + '</div>' +
+        songGroup('악보', 'var(--guitar)', songs[name].score) +
+        songGroup('참고 영상', 'var(--drums)', songs[name].video) +
+      '</div>';
+    }).join('');
+  }
+
+  function buildSongForm(){
+    var host = document.getElementById('form-song');
+    if(!host) return;
+    var authorSelect = '<select data-field="author">' + AUTHORS.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('') + '</select>';
+    host.innerHTML =
+      '<div class="card form">' +
+        '<div class="form__row">' +
+          authorSelect +
+          '<select data-field="category"><option value="score">악보</option><option value="video">참고 영상</option></select>' +
+          '<input data-field="title" list="song-names" type="text" placeholder="곡명">' +
+          '<input data-field="link" type="url" placeholder="링크">' +
+        '</div>' +
+        '<div class="form__row">' +
+          '<input data-field="content" type="text" placeholder="비고 (선택)">' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+          '<span class="form__status" data-status></span>' +
+          '<button class="form__submit">추가하기</button>' +
+        '</div>' +
+      '</div>';
+
+    var status = host.querySelector('[data-status]');
+    host.querySelector('.form__submit').addEventListener('click', function(){
+      var payload = { key: PASSPHRASE };
+      host.querySelectorAll('[data-field]').forEach(function(el){ payload[el.getAttribute('data-field')] = el.value; });
+      if(!payload.title || !payload.link){
+        status.textContent = '곡명과 링크를 입력해주세요';
+        return;
+      }
+      if(!API_URL){ status.textContent = '백엔드 연결 전이에요 (SETUP.md 참고)'; return; }
+      status.textContent = '저장 중...';
+      postEntry(payload).then(function(){
+        status.textContent = '저장됨';
+        payload.timestamp = new Date().toISOString();
+        STORE[payload.category].push(payload);
+        renderSongs();
+        updateSongNames();
+        host.querySelectorAll('input[data-field]').forEach(function(el){ el.value = ''; });
+        setTimeout(function(){ status.textContent = ''; }, 2000);
+      }).catch(function(err){
+        status.textContent = '저장 실패: ' + err.message;
+      });
+    });
+  }
+
+  function buildForm(category){
+    var host = document.getElementById('form-' + category);
+    if(!host) return;
+    var fields = FORM_FIELDS[category];
+    var authorSelect = '<select data-field="author">' + AUTHORS.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('') + '</select>';
+    var fieldHtml = fields.map(function(f){
+      if(f.type === 'textarea'){
+        return '<textarea data-field="' + f.key + '" placeholder="' + f.label + '"></textarea>';
+      }
+      return '<input data-field="' + f.key + '" type="' + (f.type === 'url' ? 'url' : 'text') + '" placeholder="' + f.label + '">';
+    }).join('');
+
+    host.innerHTML =
+      '<div class="card form">' +
+        '<div class="form__row">' + authorSelect + fieldHtml + '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+          '<span class="form__status" data-status></span>' +
+          '<button class="form__submit">남기기</button>' +
+        '</div>' +
+      '</div>';
+
+    var status = host.querySelector('[data-status]');
+    host.querySelector('.form__submit').addEventListener('click', function(){
+      var payload = { category: category, key: PASSPHRASE };
+      host.querySelectorAll('[data-field]').forEach(function(el){ payload[el.getAttribute('data-field')] = el.value; });
+
+      if(!API_URL){
+        status.textContent = '백엔드 연결 전이에요 (SETUP.md 참고)';
+        return;
+      }
+      status.textContent = '저장 중...';
+      postEntry(payload).then(function(){
+        status.textContent = '저장됨';
+        payload.timestamp = new Date().toISOString();
+        STORE[category].push(payload);
+        if(category === 'cheer') renderWall(); else renderEntries(category);
+        host.querySelectorAll('[data-field]').forEach(function(el){ el.value = ''; });
+        setTimeout(function(){ status.textContent = ''; }, 2000);
+      }).catch(function(err){
+        status.textContent = '저장 실패: ' + err.message;
+      });
+    });
+  }
+
+  function postEntry(payload){
+    return fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Apps Script CORS 이슈 회피용
+      body: JSON.stringify(payload)
+    }).then(function(res){ return res.json(); }).then(function(json){
+      if(json.error) throw new Error(json.error);
+      return json;
+    });
+  }
+
+  function loadData(){
+    if(!API_URL) return Promise.resolve();
+    return fetch(API_URL + '?key=' + encodeURIComponent(PASSPHRASE))
+      .then(function(res){ return res.json(); })
+      .then(function(json){
+        if(json.error) throw new Error(json.error);
+        Object.keys(STORE).forEach(function(k){ STORE[k] = []; });
+        (json.items || []).forEach(function(it){
+          if(STORE[it.category]) STORE[it.category].push(it);
+        });
+      });
+  }
+
+  function renderSchedule(){
+    var el = document.getElementById('schedule-value');
+    if(!el) return;
+    var entries = STORE.schedule;
+    if(!entries.length){ el.textContent = '일정이 아직 없어요'; return; }
+    var latest = entries[entries.length - 1];
+    var d = new Date(latest.title + 'T00:00:00');
+    if(isNaN(d.getTime())){ el.textContent = '일정이 아직 없어요'; return; }
+    var today = new Date(); today.setHours(0,0,0,0);
+    var diffDays = Math.round((d - today) / 86400000);
+    var label = (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
+    var dday = diffDays === 0 ? 'D-DAY' : (diffDays > 0 ? ('D-' + diffDays) : '지난 연습');
+    var note = latest.content ? '<div class="status-card__note">' + escapeHtml(latest.content) + '</div>' : '';
+    el.innerHTML = label + '<span class="dday">' + dday + '</span>' + note;
+  }
+
+  function buildScheduleForm(){
+    var host = document.getElementById('form-schedule');
+    if(!host) return;
+    var authorSelect = '<select data-field="author">' + AUTHORS.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('') + '</select>';
+    host.innerHTML =
+      '<div class="card form">' +
+        '<div class="form__row">' +
+          authorSelect +
+          '<input data-field="title" type="date">' +
+          '<input data-field="content" type="text" placeholder="장소/메모 (선택)">' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+          '<span class="form__status" data-status></span>' +
+          '<button class="form__submit">다음 연습 정하기</button>' +
+        '</div>' +
+      '</div>';
+
+    var status = host.querySelector('[data-status]');
+    host.querySelector('.form__submit').addEventListener('click', function(){
+      var payload = { category: 'schedule', key: PASSPHRASE };
+      host.querySelectorAll('[data-field]').forEach(function(el){ payload[el.getAttribute('data-field')] = el.value; });
+      if(!payload.title){ status.textContent = '날짜를 선택해주세요'; return; }
+      if(!API_URL){ status.textContent = '백엔드 연결 전이에요 (SETUP.md 참고)'; return; }
+      status.textContent = '저장 중...';
+      postEntry(payload).then(function(){
+        status.textContent = '저장됨';
+        payload.timestamp = new Date().toISOString();
+        STORE.schedule.push(payload);
+        renderSchedule();
+        host.querySelectorAll('input[data-field]').forEach(function(el){ el.value = ''; });
+        setTimeout(function(){ status.textContent = ''; }, 2000);
+      }).catch(function(err){
+        status.textContent = '저장 실패: ' + err.message;
+      });
+    });
+  }
+
+  function renderAll(){
+    ['minutes','journal','recording'].forEach(renderEntries);
+    renderSongs();
+    updateSongNames();
+    renderWall();
+    renderSchedule();
+  }
+
+  function boot(){
+    Object.keys(FORM_FIELDS).forEach(buildForm);
+    buildSongForm();
+    buildScheduleForm();
+    renderAll();
+    loadData().then(renderAll).catch(function(err){
+      console.error('load failed', err);
+    });
+
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('is-visible'); io.unobserve(en.target); } });
+      }, {threshold:.12});
+      document.querySelectorAll('[data-reveal]').forEach(function(el){ io.observe(el); });
+    } else {
+      document.querySelectorAll('[data-reveal]').forEach(function(el){ el.classList.add('is-visible'); });
+    }
+  }
+
+  if(alreadyUnlocked) boot();
+})();
+</script>
+</body>
+</html>
