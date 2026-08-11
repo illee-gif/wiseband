@@ -30,6 +30,8 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
   body{
     background:var(--bg);
     color:var(--text);
@@ -78,6 +80,9 @@
 
   /* ---------- LINEUP ---------- */
   .lineup{margin-top:-64px;position:relative;z-index:2;}
+
+  .jump-link{display:inline-flex;align-items:center;gap:6px;margin-top:20px;padding:11px 20px;border-radius:999px;background:var(--guitar);color:#fff;font-size:14px;font-weight:600;text-decoration:none;box-shadow:var(--shadow);}
+  .jump-link:hover{opacity:.9;}
   .lineup__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
   .pass{background:var(--bg-alt);border:1px solid var(--border);border-radius:14px;padding:18px 16px;box-shadow:var(--shadow);}
   .pass__role{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:inline-block;padding:3px 8px;border-radius:6px;margin-bottom:12px;}
@@ -238,6 +243,10 @@
   </div>
 </div>
 
+<div class="wrap" data-reveal style="text-align:center;">
+  <a href="#scores" class="jump-link">🎵 악보 · 참고 영상 바로가기</a>
+</div>
+
 <main class="wrap">
 
   <section class="module" data-reveal>
@@ -263,7 +272,7 @@
     <div id="form-journal"></div>
   </section>
 
-  <section class="module" data-reveal>
+  <section class="module" id="scores" data-reveal>
     <div class="module__head"><span class="module__tab" style="background:var(--guitar)"></span><h2 class="module__title">곡별 자료</h2></div>
     <p class="module__hint">곡마다 악보와 참고 영상을 한 카드에 모아둬요. 악보는 사진이나 PDF를 바로 드래그하거나 선택하면 구글 드라이브에 올라가요 — 아이패드에서 두 손가락으로 확대해서 볼 수 있어요.</p>
     <div id="songs-grid" class="songs"></div>
